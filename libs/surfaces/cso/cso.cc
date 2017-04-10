@@ -285,39 +285,64 @@ CSO::register_osc_callbacks()
 {
 	//when adding new handlers:
 	//dont forget to add corresponding CSO_STATIC_TO_MEMBER_CB_PAIR(name) in cso.h
+//grep tag for poor mans documentation
+//__SOSC
+	// "s": lua string
+	CSO_ADD_OSC_HANDLER("/eval",            "s",    osc_eval);
 
-	//"s": lua string
-	CSO_ADD_OSC_HANDLER("/eval",		"s",	osc_eval);
+	// "sss": path, types, lua function name
+	CSO_ADD_OSC_HANDLER("/map/add",         "sss",  osc_map_add);
 
-	//"sss": path, types, lua function name
-	CSO_ADD_OSC_HANDLER("/map/add", 	"sss", 	osc_map_add);
-	//"ss": path, types
-	CSO_ADD_OSC_HANDLER("/map/remove", 	"ss", 	osc_map_remove);
-	CSO_ADD_OSC_HANDLER("/map/clear", 	"", 	osc_map_clear);
-	CSO_ADD_OSC_HANDLER("/map/dump", 	"", 	osc_map_dump);
+	// "ss": path, types
+	CSO_ADD_OSC_HANDLER("/map/remove",      "ss",   osc_map_remove);
 
-	//(no arguments): set feedback address to host and port from requester
-	//"si": host, port
-	CSO_ADD_OSC_HANDLER("/connect", 	NULL, 	osc_connect);
+	// (no arguments)
+	CSO_ADD_OSC_HANDLER("/map/clear",       "",     osc_map_clear);
 
-	//turn on/off CSO debug output
-	//accepts i,T,F
-	CSO_ADD_OSC_HANDLER("/debug", 		NULL, 	osc_debug);
+	// (no arguments)
+	CSO_ADD_OSC_HANDLER("/map/dump",        "",     osc_map_dump);
 
-	//turn on/off print() to stderr from lua
-	//accepts i,T,F
-	CSO_ADD_OSC_HANDLER("/print/stderr", 	NULL, 	osc_print);
+	// (no arguments): set feedback address to host and port from requester
+	// "si": host, port
+	CSO_ADD_OSC_HANDLER("/connect",         NULL,   osc_connect);
 
-	//turn on/off print() to osc address from lua
-	//accepts i,T,F
-	CSO_ADD_OSC_HANDLER("/print/osc", 	NULL, 	osc_print_osc);
-	//set destination osc host to send print() as string
+	// turn on/off CSO debug output
+	// accepts i,T,F
+	CSO_ADD_OSC_HANDLER("/debug",           NULL,   osc_debug);
+
+	// turn on/off print() to stderr from lua
+	// accepts i,T,F
+	CSO_ADD_OSC_HANDLER("/print/stderr",    NULL,   osc_print);
+
+	// turn on/off print() to osc address from lua
+	// accepts i,T,F
+	CSO_ADD_OSC_HANDLER("/print/osc",       NULL,   osc_print_osc);
+
+	// set destination osc host to send print() as string
 	CSO_ADD_OSC_HANDLER("/print/osc/address", "si", osc_print_osc_address);
 
-	//the above pathes can't be re-defined in lua.
-	//the rest of the osc path namespace can be freely used and i.e. bound to lua functions.
-	//NULL, NULL: match all paths, all typespecs
-	CSO_ADD_OSC_HANDLER(NULL, 		NULL, 	osc_catchall);
+	// the above pathes can't be re-defined in lua.
+	// the rest of the osc path namespace can be freely used and i.e. bound to lua functions.
+
+	// NULL, NULL: match all paths, all typespecs
+	CSO_ADD_OSC_HANDLER(NULL,               NULL,   osc_catchall);
+
+	// examples:
+	// 
+	// set surface address (i.e. oscump in another terminal for testing)
+	//   /connect si localhost 9001
+	// add lua function
+	//   /eval s "function foo(x) print('hello from lua ' .. x) end"
+	// bind osc message /bar i to foo(x):
+	//   /map/add sss "/bar" "i" "foo"
+	// call foo
+	//   /bar i 42
+	// get custom feedback (can be put to a bound function, also see /connect)
+	//   /eval s "sendme('/pos', 'i', Session:transport_frame())"
+	//
+	// default CSO OSC port is 9999
+	// default CSO surface address is localhost:9000
+//__EOSC
 }
 
 //=============================================================================
