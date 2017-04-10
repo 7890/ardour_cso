@@ -42,22 +42,26 @@ set destination osc host to send print() as string
 the above pathes can't be re-defined in lua.
 the rest of the osc path namespace can be freely used and i.e. bound to lua functions.
 
-NULL, NULL: match all paths, all typespecs
+NULL, NULL: match all paths, all types
 (NULL,               NULL,   osc_catchall)
 
 examples:
 
-set surface address (i.e. oscump in another terminal for testing)
+set surface address (i.e. oscdump in another terminal for testing)
   /connect si localhost 9001
+
 add lua function
   /eval s "function foo(x) print('hello from lua ' .. x) end"
+
 bind osc message /bar i to foo(x):
   /map/add sss "/bar" "i" "foo"
+
 call foo
   /bar i 42
+
 get custom feedback (can be put to a bound function, also see /connect)
   /eval s "sendme('/pos', 'i', Session:transport_frame())"
-//
+
 default CSO OSC port is 9999
 default CSO surface address is localhost:9000
 ```
