@@ -346,6 +346,9 @@ CSO::register_osc_callbacks()
 
 	// default CSO OSC port is 9999
 	// default CSO surface address is localhost:9000
+
+	// see http://manual.ardour.org/lua-scripting/
+	// see http://manual.ardour.org/lua-scripting/class_reference/
 //__EOSC
 }
 

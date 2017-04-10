@@ -64,4 +64,7 @@ get custom feedback (can be put to a bound function, also see /connect)
 
 default CSO OSC port is 9999
 default CSO surface address is localhost:9000
+
+see http://manual.ardour.org/lua-scripting/
+see http://manual.ardour.org/lua-scripting/class_reference/
 ```
