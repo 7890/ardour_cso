@@ -151,6 +151,7 @@ function lz3(number) return string.format("%03d", number) end
 function lz4(number) return string.format("%04d", number) end
 -- http://lua-users.org/wiki/SimpleRound, round towards 0
 function round0(num) if num >= 0 then return math.floor(num+.5) else return math.ceil(num-.5) end end
+function ibool(is_true) if is_true then return 1 else return 0 end end
 
 -- ============================================================================
 function cso_timecode_clock_string(position)
