@@ -327,25 +327,26 @@ CSO::register_osc_callbacks()
 	// NULL, NULL: match all paths, all types
 	CSO_ADD_OSC_HANDLER(NULL,               NULL,   osc_catchall);
 
-	// examples:
+	// examples
+	// ========
 
-	// set surface address (i.e. oscdump in another terminal for testing)
+	// set surface address (i.e. oscdump in another terminal for testing):
 	//   /connect si localhost 9001
 
-	// add lua function
+	// add lua function:
 	//   /eval s "function foo(x) print('hello from lua ' .. x) end"
 
 	// bind osc message /bar i to foo(x):
 	//   /map/add sss "/bar" "i" "foo"
 
-	// call foo
+	// call foo:
 	//   /bar i 42
 
-	// get custom feedback (can be put to a bound function, also see /connect)
+	// get custom feedback (can be put to a bound function, also see /connect):
 	//   /eval s "sendme('/pos', 'i', Session:transport_frame())"
 
-	// default CSO OSC port is 9999
-	// default CSO surface address is localhost:9000
+	// default CSO OSC port is 9999 (UDP)
+	// default CSO surface address is localhost:9000 (UDP)
 
 	// see http://manual.ardour.org/lua-scripting/
 	// see http://manual.ardour.org/lua-scripting/class_reference/
