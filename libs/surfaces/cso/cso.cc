@@ -24,7 +24,13 @@
 
 #include <pbd/failed_constructor.h>
 
+#include <fcntl.h>
+#include <glib.h>
+#include "pbd/gstdio_compat.h"
+
 #include "ardour/session.h"
+#include "ardour/search_paths.h"
+#include "pbd/file_utils.h"
 #include "cso.h"
 #include "pbd/i18n.h"
 
@@ -53,7 +59,12 @@ CSO::CSO (Session& s)
 	, AbstractUI<CSORequest> (name())
 	, osc_server_port (9999) //will be read from cso_params
 	, osc_server (0)
-	, cso_custom_script_uri ("/tmp/cso/null/null.lua") ///needs gui configuration
+
+	//default path values, will be updated using lua_search_path ()
+	, cso_home_path ("/tmp/cso")
+	, cso_start_script_uri ("/tmp/cso/start.lua")
+	, cso_custom_script_uri ("/tmp/cso/null/null.lua")
+
 	, osc_debug_enabled (false)
 	, lua_print_stderr_enabled (true)
 	, lua_print_osc_enabled (false)
@@ -577,6 +588,9 @@ CSO::cb_osc_catchall (const char *path, const char* types, lo_arg **argv, int ar
 		string fname=o->method;
 		fprintf(stderr, "CSO::trying to call method %s with %d args (%s)\n", fname.c_str(), nargs, o->types.c_str());
 
+		///need solution for a.b.c:d() calls. for now must be wrapped with "flat" method.
+		///http://stackoverflow.com/questions/1888672/calling-functions-in-a-lua-table-from-c
+
 		luabridge::LuaRef lua_ref = luabridge::getGlobal(L, fname.c_str());
 		if(lua_ref.isFunction ())
 		{
@@ -627,8 +641,48 @@ CSO::cb_osc_catchall (const char *path, const char* types, lo_arg **argv, int ar
 //=============================================================================
 //=============================================================================
 //=============================================================================
+bool
+CSO::set_script_uri_and_path()
+{
+	vector<string> files;
+	PBD::Searchpath search_path (lua_search_path ());
+	search_path.add_subdirectory_to_paths ("cso");
+	PBD::find_files_matching_pattern (files, search_path, "start.lua");
+	if(files.size()<1){return false;}
+
+	fprintf(stderr,"CSO::looking for start.lua in lua_search_path subdir 'cso':\n%s\n"
+		,search_path.to_string().c_str());
+
+	//check that g_open will successfully open the file
+	for (vector<string>::iterator i = files.begin (); i != files.end (); ++i)
+	{
+		string input_path = *i;
+		fprintf(stderr,"CSO::found start.lua: %s\n", input_path.c_str());
+
+		int fdgo = g_open (input_path.c_str(), O_RDONLY, 0444);
+		if(fdgo==-1){return false;}
+
+		//if file could be opened in read mode, close it again
+		if(fdgo>=0){::close (fdgo);}
+
+		//set start uri and cso home
+		cso_start_script_uri=input_path;
+		cso_home_path=Glib::path_get_dirname(cso_start_script_uri);
+		return true;
+	}
+	return false;
+	/*
+	//inspiration
+	if ((s = getenv ("ENV_VAR"))) {}
+	PBD::Searchpath control_protocol_search_path ()
+	int const r = symlink ("bar", "foo/jim");
+	if (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
+	*/
+} //set_script_uri_and_path()
+
+//=============================================================================
 void
-CSO::lua_init () 
+CSO::lua_init ()
 {
 	//connect the print() method
 	lua.Print.connect(sigc::mem_fun(*this, &CSO::lua_print));
@@ -686,7 +740,7 @@ CSO::lua_init ()
 	//in lua: CSO:access_action(...)
 
 	//create reference to useful os functions (before setting io to nil)
-	lua.do_command("local tmpref=os.date os = {} os.date=tmpref");
+	lua.do_command("local tmpref1=os.date local tmpref2=os.time os = {} os.date=tmpref1 os.time=tmpref2");
 
 	//prevent use of some built-in lua functions (os reduced to os.date see above)
 	lua.do_command ("io = nil          loadfile = nil require = nil dofile = nil package = nil debug = nil");
@@ -711,6 +765,38 @@ CSO::lua_init ()
 	//once this is loaded cso is ready yet in a generic state
 	lua.do_command("load(cso_base64_dec('" + CSO_SCRIPT + "'))()");
 
+	//find start.lua via ardour path / search methods
+	if(!set_script_uri_and_path())
+	{
+		fprintf(stderr,"CSO::Error: could not find start.lua in search path\n");
+	}
+/*
+	-- start script syntax
+	function cso_custom_script_uri()
+	{{
+		uri_relative="cso/null/null.lua"
+	}}
+*/
+	lua.do_file(cso_start_script_uri);
+
+	string fname="cso_custom_script_uri";
+	luabridge::LuaRef lua_start_params = luabridge::getGlobal (L, fname.c_str());
+	if(lua_start_params.isFunction ())
+	{
+		luabridge::LuaRef params = lua_start_params ();
+		if (params.isTable ())
+		{
+			for (luabridge::Iterator it (params); !it.isNil (); ++it)
+			{
+				if (!it.value ()["uri_relative"].isString ()) { break; }
+
+				string uri_relative=it.value()["uri_relative"].cast<string>();
+				cso_custom_script_uri=Glib::build_filename(cso_home_path, uri_relative);
+				break;
+			}
+		}
+	}else{warn_lua_function_not_found(fname);}
+
 	//load script specific to surface / layout.
 	//the namespace is shared with the cso script.
 	//**functions can be overridden.**
@@ -720,7 +806,7 @@ CSO::lua_init ()
 	//now all lua code (except includes) is known to the scripting environment.
 
 	//start to call methods and setup cso and the surface
-	string fname="cso_params";
+	fname="cso_params";
 	luabridge::LuaRef lua_params = luabridge::getGlobal (L, fname.c_str());
 	if(lua_params.isFunction ()) 
 	{
@@ -745,10 +831,17 @@ CSO::lua_init ()
 				{
 					if (!i.key ().isNumber ()) { continue; }
 					if (!i.value ().isString ()) { continue; }
-					fprintf(stderr,"CSO::LOADLIBS %d /tmp/%s\n"
-						,i.key().cast<int>(), i.value().cast<std::string>().c_str());
+
+					string script_uri_relative
+						=i.value().cast<std::string>().c_str();
+					string cso_load_additional_script_uri
+						=Glib::build_filename(cso_home_path, script_uri_relative);
+
+					fprintf(stderr,"CSO::LOADLIBS %d %s\n"
+						,i.key().cast<int>()
+						,cso_load_additional_script_uri.c_str());
 					///
-					lua.do_file("/tmp/" + i.value().cast<std::string>());
+					lua.do_file(cso_load_additional_script_uri);
 				}
 			}
 		} //is table

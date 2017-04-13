@@ -89,7 +89,9 @@ class CSO : public ARDOUR::ControlProtocol, public AbstractUI<CSORequest>
 	lo_server osc_server;
 	//end of minimal set
 
-	static constexpr float cso_api_version=0.1f; //~
+	static constexpr float cso_api_version=0.2f; //~
+	std::string cso_home_path;
+	std::string cso_start_script_uri;
 	std::string cso_custom_script_uri;
 
 	bool osc_debug_enabled;
@@ -184,6 +186,7 @@ class CSO : public ARDOUR::ControlProtocol, public AbstractUI<CSORequest>
 
 	LuaState lua;
 	lua_State* L;
+	bool set_script_uri_and_path ();
 	void lua_init ();
 	void lua_print (std::string s);
 	void warn_lua_function_not_found (std::string function_name);
