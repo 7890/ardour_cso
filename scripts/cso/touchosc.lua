@@ -57,13 +57,15 @@ function tosc_create_osc_mappings_from_model(model)
 				-- add mapping for widget
 				cso_map_add(widget.props.path, "f", widget.props.random);
 				str="function " .. widget.props.random .. "(f) m." 
-				.. widget.props.tab .. "." .. widget.props.n .. ":event(f) end"
+					.. widget.props.tab .. "." .. widget.props.n .. ":event(f) end"
 				load(str)()
 			end
 		end
 		::_skip::
 	end
 end
+-- tosc_create_osc_mappings_from_model()
+
 
 -- generic functions to be attached to model{}
 -- ============================================================================
@@ -219,11 +221,10 @@ function tosc_add_tab(model,name,path)
 	--set path
 	model[name]['props']['path']=path
 	model[name]['props']['type']='tab'
-
+	--will be used as function name for the osc callback mapping
 	model[name]['props']['random']="_cso_" .. string.random(20) .. ARDOUR.LuaAPI:monotonic_time()
 
 	tab=model[name]
-
 	function tab:dump() return print_r(self) end
 	function tab:path() return self.props.path end
 	function tab:type() return self.props.type end
@@ -245,14 +246,12 @@ function tosc_add_widget(model, table)
 		model[table.tab][table.n]['props']['random']="_cso_" .. string.random(20)
 
 		widget=model[table.tab][table.n]
-
 		function widget:dump() return print_r(self) end
 		function widget:path() return self.props.path end
 		function widget:type() return self.props.type end
 		function widget:parent() return model[table.tab] end
 		function widget:root() return model end
 		function widget:send(types, ...) tx=self:root() tx:send(self:path(), types, ...) end
-
 		function widget:reset() return tosc_reset_widget(self) end
 		function widget:show() return tosc_show_widget(self) end
 		function widget:hide() return tosc_hide_widget(self) end
@@ -269,12 +268,10 @@ function tosc_add_widget(model, table)
 --		if widget.props.scalef then end
 		if widget:type() == "toggle" or widget:type() == "push" then
 			function widget:set(b) return tosc_set_button(self,b) end
-
-			function widget:off() return tosc_set_widget_off(self) end
 			function widget:on() return tosc_set_widget_on(self) end
+			function widget:off() return tosc_set_widget_off(self) end
 			function widget:is_on() return self.props.v and      self.props.v == 1 end
 			function widget:is_off() return self.props.v and not(self.props.v == 1) end
-
 		elseif widget:type() == "led" then
 			function widget:set(f) return tosc_set_led(self,f) end
 		elseif widget:type() == "rotaryv" or widget:type() == "rotaryh" 
