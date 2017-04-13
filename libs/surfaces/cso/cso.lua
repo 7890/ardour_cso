@@ -219,4 +219,25 @@ function print_r ( t )
 	print()
 end
 -- print_r
+
+--https://gist.github.com/haggen/2fd643ea9a261fea2094
+-- ============================================================================
+local charset = {}
+-- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890
+for i = 48,  57 do table.insert(charset, string.char(i)) end
+for i = 65,  90 do table.insert(charset, string.char(i)) end
+for i = 97, 122 do table.insert(charset, string.char(i)) end
+
+--this is not really random (?)
+--caller can append ARDOUR.LuaAPI:monotonic_time()
+function string.random(length)
+--	math.randomseed(os.time())
+	math.randomseed(ARDOUR.LuaAPI:monotonic_time())
+	if length > 0 then
+		return string.random(length - 1) .. charset[math.random(1, #charset)]
+	else
+		return ""
+	end
+end
+
 -- EOF
