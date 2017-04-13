@@ -28,7 +28,6 @@ checkAvail()
 	if [ $ret -ne 0 ]
 	then
 		echo "tool \"$1\" not found. please install" >&2
-		echo "<error>tool \"$1\" not found. please install</error>"
 		exit 1
 	fi
 }
