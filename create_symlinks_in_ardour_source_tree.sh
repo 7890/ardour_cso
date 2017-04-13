@@ -38,6 +38,7 @@ echo "rm -f \"$ARDOUR_HOME/gtk2_ardour/ardev_common.sh.in\""
 echo "ln -s \"$CSO_HOME/libs/surfaces/cso\" \"$ARDOUR_HOME/libs/surfaces/\""
 echo "ln -s \"$CSO_HOME/libs/surfaces/wscript\" \"$ARDOUR_HOME/libs/surfaces/\""
 echo "ln -s \"$CSO_HOME/gtk2_ardour/ardev_common.sh.in\" \"$ARDOUR_HOME/gtk2_ardour/\""
+echo "ln -s \"$CSO_HOME/scripts/cso/\" \"$ARDOUR_HOME/scripts/\""
 ) > "$tmpfile"
 
 echo ""
