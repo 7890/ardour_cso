@@ -240,4 +240,14 @@ function string.random(length)
 	end
 end
 
+-- http://stackoverflow.com/questions/1426954/split-string-in-lua
+-- ============================================================================
+function string.split(s, delimiter)
+	result = {};
+	for match in (s..delimiter):gmatch("(.-)"..delimiter) do
+		table.insert(result, match);
+	end
+	return result;
+end
+
 -- EOF
