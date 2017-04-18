@@ -1,3 +1,5 @@
+-- touchosc.lua
+--
 --  ====    ====    ====  
 -- ==  ==  ==  ==  ==  == 
 -- ==      ==      ==  == 
@@ -65,7 +67,6 @@ function tosc_create_osc_mappings_from_model(model)
 	end
 end
 -- tosc_create_osc_mappings_from_model()
-
 
 -- generic functions to be attached to model{}
 -- ============================================================================
