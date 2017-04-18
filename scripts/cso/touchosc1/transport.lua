@@ -158,8 +158,8 @@ function on_ardour_routes_added()
 end
 
 -- ============================================================================
-function on_ardour_solo_state_changed(is_soloed)
-	print("SOLO STATE CHANGED TO: " .. is_soloed)
+function on_ardour_solo_state_changed() ----is_soloed)
+	print("SOLO STATE CHANGED: ") --- .. is_soloed)
 end
 
 -- ============================================================================
