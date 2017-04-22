@@ -210,7 +210,7 @@ XMLNode&
 CSO::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
-	///node.add_property ("cso_control_protocol_property", 42);
+	///node.set_property ("cso_control_protocol_property", 42);
 	return node;
 }
 
@@ -702,36 +702,98 @@ CSO::lua_init ()
 	luabridge::getGlobalNamespace(L)
 		.beginNamespace("Surface")
 			.beginClass<BasicUI>("BasicUI")
+				//from BasicUI::
 				//access_action: see manual.ardour.org/appendix/menu-actions-list/
 				.addFunction("access_action", &BasicUI::access_action)
 
-				//!\ this list is not complete
-				//need to add more from BasicUI::
-
-				//note name != 
-				.addFunction("toggle_loop", &BasicUI::loop_toggle)
-				.addFunction("toggle_roll", &BasicUI::toggle_roll)
-				//note name !=
-				.addFunction("toggle_rec", &BasicUI::rec_enable_toggle)
-
+				//transport
+				.addFunction("transport_stop", &BasicUI::transport_stop)
+				.addFunction("transport_play", &BasicUI::transport_play) //bool jump_back = false (?)
+				.addFunction("set_transport_speed", &BasicUI::set_transport_speed) //double speed
 				.addFunction("goto_zero", &BasicUI::goto_zero)
-				.addFunction("jump_by_seconds", &BasicUI::jump_by_seconds)
-				.addFunction("jump_by_bars", &BasicUI::jump_by_bars)
+				.addFunction("goto_start", &BasicUI::goto_start) //bool and_roll = false
+				.addFunction("goto_end", &BasicUI::goto_end)
+				.addFunction("rewind", &BasicUI::rewind)
+				.addFunction("ffwd", &BasicUI::ffwd)
+				.addFunction("jump_by_seconds", &BasicUI::jump_by_seconds) //double sec
+				.addFunction("jump_by_bars", &BasicUI::jump_by_bars) //double bars
+				//double is misleading, jumping by 1.7 bars isn't possible
+				//jump_by_beats is missing
+				//setting ranges from selection
+				.addFunction("set_punch_range", &BasicUI::set_punch_range)
+				.addFunction("set_loop_range", &BasicUI::set_loop_range)
+				.addFunction("set_session_range", &BasicUI::set_session_range)
+				.addFunction("loop_toggle", &BasicUI::loop_toggle)
+				.addFunction("toggle_loop", &BasicUI::loop_toggle) //alias
+				.addFunction("loop_location", &BasicUI::loop_location) //framepos_t start, framepos_t end
+				.addFunction("toggle_punch_in", &BasicUI::toggle_punch_in)
+				.addFunction("toggle_punch_out", &BasicUI::toggle_punch_out)
+				.addFunction("locate", &BasicUI::locate) //framepos_t frame, bool play = false
 
+				//markers
+				.addFunction("add_marker", &BasicUI::add_marker ) //string markername
+				.addFunction("remove_marker_at_playhead", &BasicUI::remove_marker_at_playhead)
 				.addFunction("prev_marker", &BasicUI::prev_marker)
 				.addFunction("next_marker", &BasicUI::next_marker)
-				.addFunction("remove_marker_at_playhead", &BasicUI::remove_marker_at_playhead)
+				.addFunction("goto_nth_marker", &BasicUI::goto_nth_marker ) //int n
 
-				.addFunction("temporal_zoom_in", &BasicUI::temporal_zoom_in)
-				.addFunction("temporal_zoom_out", &BasicUI::temporal_zoom_out)
-
-				//note name !=
-				.addFunction("set_loop_range", &BasicUI::loop_location)
-
+				.addFunction("save_state", &BasicUI::save_state)
 				.addFunction("undo", &BasicUI::undo)
 				.addFunction("redo", &BasicUI::redo)
+				.addFunction("mark_in", &BasicUI::mark_in)
+				.addFunction("mark_out", &BasicUI::mark_out)
+				.addFunction("toggle_click", &BasicUI::toggle_click)
+				.addFunction("midi_panic", &BasicUI::midi_panic)
+				.addFunction("toggle_monitor_mute", &BasicUI::toggle_monitor_mute)
+				.addFunction("toggle_monitor_dim", &BasicUI::toggle_monitor_dim)
+				.addFunction("toggle_monitor_mono", &BasicUI::toggle_monitor_mono)
+				.addFunction("cancel_all_solo", &BasicUI::cancel_all_solo)
+				.addFunction("quick_snapshot_stay", &BasicUI::quick_snapshot_stay) //?
+				.addFunction("quick_snapshot_switch", &BasicUI::quick_snapshot_switch) //?
+				//this provides the same operation as the "spacebar", it's a lot smarter than "play".
+				.addFunction("toggle_roll", &BasicUI::toggle_roll)
+				//stop ongoing recording and forget about it (all recordings LOST / not stored to disk)
+				.addFunction("stop_forget", &BasicUI::stop_forget)
+				//set master record enable/disable
+				.addFunction("set_record_enable", &BasicUI::set_record_enable)// bool yn
+				//master record
+				.addFunction("rec_enable_toggle", &BasicUI::rec_enable_toggle)
+				//this function does currently nothing in BasicUI
+				//.addFunction("toggle_all_rec_enables", &BasicUI::toggle_all_rec_enables)
+				.addFunction("all_tracks_rec_enable", &BasicUI::all_tracks_rec_in)
+				.addFunction("all_tracks_rec_in", &BasicUI::all_tracks_rec_in)
+				.addFunction("all_tracks_rec_disable", &BasicUI::all_tracks_rec_out)
+				.addFunction("all_tracks_rec_out", &BasicUI::all_tracks_rec_out)
 
-				//.addFunction("timecode_time", &BasicUI::timecode_time)
+				//editor visibility stuff
+				//(why do we have to make explicit numbers here?  because "gui actions" don't accept args
+				.addFunction("fit_1_track", &BasicUI::fit_1_track)
+				.addFunction("fit_2_tracks", &BasicUI::fit_2_tracks)
+				.addFunction("fit_4_tracks", &BasicUI::fit_4_tracks)
+				.addFunction("fit_8_tracks", &BasicUI::fit_8_tracks)
+				.addFunction("fit_16_tracks", &BasicUI::fit_16_tracks)
+				.addFunction("fit_32_tracks", &BasicUI::fit_32_tracks)
+				.addFunction("fit_all_tracks", &BasicUI::fit_all_tracks)
+				.addFunction("zoom_10_ms", &BasicUI::zoom_10_ms)
+				.addFunction("zoom_100_ms", &BasicUI::zoom_100_ms)
+				.addFunction("zoom_1_sec", &BasicUI::zoom_1_sec)
+				.addFunction("zoom_10_sec", &BasicUI::zoom_10_sec)
+				.addFunction("zoom_1_min", &BasicUI::zoom_1_min)
+				.addFunction("zoom_5_min", &BasicUI::zoom_5_min)
+				.addFunction("zoom_10_min", &BasicUI::zoom_10_min)
+				.addFunction("zoom_to_session", &BasicUI::zoom_to_session)
+				.addFunction("temporal_zoom_in", &BasicUI::temporal_zoom_in)
+				.addFunction("temporal_zoom_out", &BasicUI::temporal_zoom_out)
+				.addFunction("scroll_up_1_track", &BasicUI::scroll_up_1_track)
+				.addFunction("scroll_dn_1_track", &BasicUI::scroll_dn_1_track)
+				.addFunction("scroll_down_1_track", &BasicUI::scroll_dn_1_track) //alias
+				.addFunction("scroll_up_1_page", &BasicUI::scroll_up_1_page)
+				.addFunction("scroll_down_1_page", &BasicUI::scroll_dn_1_page) //alias
+				.addFunction("scroll_dn_1_page", &BasicUI::scroll_dn_1_page)
+
+				//.addFunction("timecode_time", &BasicUI::timecode_time  )//(framepos_t where, Timecode::Time&);
+				//.addFunction("timecode_to_sample", &BasicUI::timecode_to_sample  )//(Timecode::Time& timecode, framepos_t & sample, bool use_offset, bool use_subframes) const;
+				//.addFunction("sample_to_timecode", &BasicUI::sample_to_timecode  )//(framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 			.endClass()
 		.endNamespace();
 
@@ -788,11 +850,12 @@ CSO::lua_init ()
 		{
 			for (luabridge::Iterator it (params); !it.isNil (); ++it)
 			{
-				if (!it.value ()["uri_relative"].isString ()) { break; }
-
-				string uri_relative=it.value()["uri_relative"].cast<string>();
-				cso_custom_script_uri=Glib::build_filename(cso_home_path, uri_relative);
-				break;
+				if (it.value ()["uri_relative"].isString ())
+				{
+					string uri_relative=it.value()["uri_relative"].cast<string>();
+					cso_custom_script_uri=Glib::build_filename(cso_home_path, uri_relative);
+					break;
+				}
 			}
 		}
 	}else{warn_lua_function_not_found(fname);}
@@ -815,33 +878,38 @@ CSO::lua_init ()
 		{
 			for (luabridge::Iterator it (params); !it.isNil (); ++it)
 			{
-				if (!it.value ()["osc_server_port"].isNumber ()) { break; }
-				if (!it.value ()["osc_debug"].isBoolean ()) { break; }
-				if (!it.value ()["timer1_interval_ms"].isNumber ()) { break; }
-				if (!it.value ()["loadlibs"].isTable ()) { break; }
-
-				osc_server_port=it.value()["osc_server_port"].cast<int>();
-				osc_debug_enabled=it.value()["osc_debug"].cast<bool>();
-				timer1_interval_ms=it.value()["timer1_interval_ms"].cast<int>();
-
-				//read table loadlibs={'foo.lua','bar/baz.lua'}
-				luabridge::LuaRef libs (it.value()["loadlibs"]);
-
-				for (luabridge::Iterator i (libs); !i.isNil (); ++i)
+				if (it.value ()["osc_server_port"].isNumber ())
 				{
-					if (!i.key ().isNumber ()) { continue; }
-					if (!i.value ().isString ()) { continue; }
+					osc_server_port=it.value()["osc_server_port"].cast<int>();
+				}
+				if (it.value ()["osc_debug"].isBoolean ())
+				{
+					osc_debug_enabled=it.value()["osc_debug"].cast<bool>();
+				}
+				if (it.value ()["timer1_interval_ms"].isNumber ())
+				{
+					timer1_interval_ms=it.value()["timer1_interval_ms"].cast<int>();
+				}
+				if (it.value ()["loadlibs"].isTable ())
+				{
+					//read table loadlibs={'foo.lua','bar/baz.lua'}
+					luabridge::LuaRef libs (it.value()["loadlibs"]);
 
-					string script_uri_relative
-						=i.value().cast<std::string>().c_str();
-					string cso_load_additional_script_uri
-						=Glib::build_filename(cso_home_path, script_uri_relative);
+					for (luabridge::Iterator i (libs); !i.isNil (); ++i)
+					{
+						if (!i.key ().isNumber ()) { continue; }
+						if (!i.value ().isString ()) { continue; }
 
-					fprintf(stderr,"CSO::LOADLIBS %d %s\n"
-						,i.key().cast<int>()
-						,cso_load_additional_script_uri.c_str());
-					///
-					lua.do_file(cso_load_additional_script_uri);
+						string script_uri_relative
+							=i.value().cast<std::string>().c_str();
+						string cso_load_additional_script_uri
+							=Glib::build_filename(cso_home_path, script_uri_relative);
+
+						fprintf(stderr,"CSO::LOADLIBS %d %s\n"
+							,i.key().cast<int>()
+							,cso_load_additional_script_uri.c_str());
+						lua.do_file(cso_load_additional_script_uri);
+					}
 				}
 			}
 		} //is table
