@@ -5,8 +5,8 @@
 
 function cso_custom_script_uri() return
 {{
---	uri_relative="null/null.lua"
-	uri_relative="signals/signals.lua"
+	uri_relative="null/null.lua"
+--	uri_relative="signals/signals.lua"
 --	uri_relative="touchosc0/basic.lua"
 --	uri_relative="touchosc1/transport.lua"
 }}
