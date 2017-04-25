@@ -1,0 +1,3 @@
+https://github.com/craigmj/json4lua/archive/master.zip
+https://github.com/craigmj/json4lua
+
