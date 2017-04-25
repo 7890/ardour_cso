@@ -1,0 +1,3 @@
+https://github.com/Cluain/Lua-Simple-XML-Parser/archive/master.zip
+https://github.com/Cluain/Lua-Simple-XML-Parser
+
