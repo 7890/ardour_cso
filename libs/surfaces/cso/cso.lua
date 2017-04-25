@@ -1,3 +1,5 @@
+-- cso.lua
+-- 
 --  ====    ====    ====  
 -- ==  ==  ==  ==  ==  == 
 -- ==      ==      ==  == 
@@ -82,6 +84,7 @@ function cso_map_remove(path, types) self_tx:send ("/map/remove", "ss", path, ty
 function cso_map_clear() self_tx:send ("/map/clear", "") end
 function cso_map_dump() self_tx:send ("/map/dump", "") end
 function cso_set_feedback_address(host, port) self_tx:send ("/connect", "si", host, port) end
+function cso_debug(do_debug) if do_debug then self_tx:send ("/debug", "T", true) else self_tx:send ("/debug", "F", false) end end
 
 -- ============================================================================
 function cso_init(_cso_api_version, _osc_server_port) 
