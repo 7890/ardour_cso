@@ -26,7 +26,7 @@ function cso_params() return
 	osc_server_port = 9998
 	,osc_debug = true
 	,timer1_interval_ms = 250
-	,loadlibs = {'touchosc.lua', 'touchosc1/gen.lua'}
+	,loadlibs = {'ardour_actions.lua', 'touchosc.lua', 'touchosc1/gen.lua'}
 }}
 end
 
@@ -130,36 +130,11 @@ function on_ardour_record_state_changed()
 	m.tab1.rec:set(rec_going_on())
 end
 
--- ============================================================================
-function on_ardour_looped()
-	print("LOOP")
-end
-
 -- updating the clock on every locate makes other "goto_xx" code simpler
 -- ============================================================================
 function on_ardour_session_located()
 	if m:active_tab() ~= "tab1" then return end
 	tosc_update_clock()
-end
-
--- ============================================================================
-function on_ardour_config_parameter_changed(param)
-	print("PARAM CHANGE: " .. param)
-end
-
--- ============================================================================
-function on_ardour_session_exported(path, name)
-	print("SESSION EXPORTED: " .. path .. " " .. name)
-end
-
--- ============================================================================
-function on_ardour_routes_added()
-	print("ROUTES ADDED ")
-end
-
--- ============================================================================
-function on_ardour_solo_state_changed() ----is_soloed)
-	print("SOLO STATE CHANGED: ") --- .. is_soloed)
 end
 
 -- ============================================================================
@@ -205,7 +180,9 @@ end
 function m.tab1.add_marker:event(f)
 	-- ignore button release
 	if f == 0 then return end
-	CSO:access_action('Common/add-location-from-playhead')
+--	CSO:access_action('Common/add-location-from-playhead')
+	--using ardour_actions.lua
+	aa.Common:add_location_from_playhead()
 --	local loc = Session:locations() -- all marker locations
 end
 
