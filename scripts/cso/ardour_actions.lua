@@ -33,9 +33,10 @@ aa={}
 -- to update table ardour_action_tokens (this should not happen too frequently):
 
 -- get list of bindable actions from ardour:
--- ardour5 --bindings > ardour_actions.txt
+-- ardour5 --actions > ardour_actions.txt
 
 -- ///OLD
+-- ardour5 --bindings > ardour_actions.txt
 -- preprocess:
 -- cat ardour_actions.txt | cut -d'>' -f2- | cut -d" " -f1 | grep "^/" > ardour_actions_plain.txt
 -- create lua code:
@@ -775,7 +776,7 @@ local ardour_action_tokens={
 '/Mixer/solo',
 '/Mixer/toggle-midi-input-active',
 '/Mixer/toggle-processors',
-'/Mixer/unity-gain'
+'/Mixer/unity-gain',
 }
 
 -- ============================================================================
