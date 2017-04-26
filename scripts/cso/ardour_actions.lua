@@ -30,16 +30,31 @@
 
 aa={}
 
--- to update table ardour_action_tokens:
+-- to update table ardour_action_tokens (this should not happen too frequently):
 
 -- get list of bindable actions from ardour:
--- ardour5 --bindings > ardour_bindings.txt
+-- ardour5 --bindings > ardour_actions.txt
 
+-- ///OLD
 -- preprocess:
--- cat ardour_bindings.txt | cut -d'>' -f2- | cut -d" " -f1 | grep "^/" > ardour_bindings_plain.txt
-
+-- cat ardour_actions.txt | cut -d'>' -f2- | cut -d" " -f1 | grep "^/" > ardour_actions_plain.txt
 -- create lua code:
--- echo "ardour_action_tokens={" && cat ardour_bindings_plain.txt | while read line; do echo "'"$line"',"; done && echo "}"
+-- echo "ardour_action_tokens={" && cat ardour_actions_plain.txt | while read line; do echo "'"$line"',"; done && echo "}"
+-- ///
+
+-- starting from ardour git rev 5d5642d6ec22213b0b944936328a0ae005bf577c:
+-- the bindings dump format changed and contains now a short description for every action.
+-- preprocess:
+-- (anytime the dump format changes this will break. this is odd.)
+-- #cut away junk before partial HTML, make well-formed, enclose in root tag, escape ampersand, escape apos:
+-- (echo "<actions>"; cat ardour_actions.txt | grep -A 100000 '^<h2>' | sed 's/ class="dl"//g' | sed 's/&/&amp;/g' | sed "s/'/\&apos;/g"; echo "</actions>") | xmlstarlet fo > ardour_actions.xml
+-- #create lua array:
+-- cat ardour_actions.xml | xmlstarlet sel -t -o 'local ardour_action_tokens={' -n -m "//tbody/tr" -o "'" -v th/kbd -o "'," -n -b -o '}' -n -n > ardour_actions.part
+-- #cat ardour_actions.xml | xmlstarlet sel -t -o 'local ardour_action_tokens_description={' -n -m "//tbody/tr" -o "'" -v td -o "'," -n -b -o '}' -n -n >> ardour_actions.part
+-- #replace ardour_action_tokens in this file
+-- #handle with care
+-- #cat ardour_actions.part >> ardour_actions.lua
+-- #then move the appended array BEFORE functions, right here
 
 -- ============================================================================
 local ardour_action_tokens={
@@ -153,14 +168,11 @@ local ardour_action_tokens={
 '/Common/remove-location-from-playhead',
 '/Common/set-session-end-from-playhead',
 '/Common/set-session-start-from-playhead',
-'/Common/show-editor',
-'/Common/show-mixer',
 '/Common/show-preferences',
 '/Common/start-loop-range',
 '/Common/start-punch-range',
 '/Common/start-range',
 '/Common/start-range-from-playhead',
-'/Common/toggle-editor-and-mixer',
 '/Common/toggle-location-at-playhead',
 '/Common/toggle-luawindow',
 '/Common/toggle-meterbridge',
@@ -284,6 +296,7 @@ local ardour_action_tokens={
 '/Transport/secondary-clock-minsec',
 '/Transport/secondary-clock-samples',
 '/Transport/secondary-clock-timecode',
+'/Window/show-mixer',
 '/Window/toggle-about',
 '/Window/toggle-add-routes',
 '/Window/toggle-add-video',
@@ -291,6 +304,7 @@ local ardour_action_tokens={
 '/Window/toggle-audio-midi-setup',
 '/Window/toggle-big-clock',
 '/Window/toggle-bundle-manager',
+'/Window/toggle-idle-o-meter',
 '/Window/toggle-inspector',
 '/Window/toggle-key-editor',
 '/Window/toggle-locations',
@@ -757,6 +771,7 @@ local ardour_action_tokens={
 '/Mixer/scroll-right',
 '/Mixer/select-all-processors',
 '/Mixer/select-none',
+'/Mixer/show-editor',
 '/Mixer/solo',
 '/Mixer/toggle-midi-input-active',
 '/Mixer/toggle-processors',
@@ -771,6 +786,7 @@ function ardour_find_actions_in_component(self,pattern)
 			table.insert(matches,fname)
 		end
 	end
+
 	table.sort(matches)
 	for i, fname in pairs(matches) do
 		print(fname)
