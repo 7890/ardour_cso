@@ -280,7 +280,7 @@ CSO::register_signal_callbacks()
 	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&CSO::on_signal_looped, this), this);
 	session->Located.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&CSO::on_signal_session_located, this), this);
 	///..in session_connections
-	ControlProtocol::StripableSelectionChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&CSO::on_signal_stripable_selection_changed, this), this);
+	///ControlProtocol::StripableSelectionChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&CSO::on_signal_stripable_selection_changed, this), this);
 	//see gtk2_ardour/luasignal_syms.h for inspiration
 }
 

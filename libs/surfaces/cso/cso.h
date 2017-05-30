@@ -65,6 +65,8 @@ class CSO : public ARDOUR::ControlProtocol, public AbstractUI<CSORequest>
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
+	void stripable_selection_changed () {}///
+
 	int set_active (bool yn);
 	bool get_active () const;
 
