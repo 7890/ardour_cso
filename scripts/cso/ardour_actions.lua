@@ -32,30 +32,20 @@ aa={}
 
 -- to update table ardour_action_tokens (this should not happen too frequently):
 
--- get list of bindable actions from ardour:
--- ardour5 --actions > ardour_actions.txt
+-- start Ardour with flag --actions:
+-- -A, --actions               Print all possible menu action names
 
--- ///OLD
--- ardour5 --bindings > ardour_actions.txt
--- preprocess:
--- cat ardour_actions.txt | cut -d'>' -f2- | cut -d" " -f1 | grep "^/" > ardour_actions_plain.txt
--- create lua code:
--- echo "ardour_action_tokens={" && cat ardour_actions_plain.txt | while read line; do echo "'"$line"',"; done && echo "}"
--- ///
+-- $ ./ardev --actions
 
--- starting from ardour git rev 5d5642d6ec22213b0b944936328a0ae005bf577c:
--- the bindings dump format changed and contains now a short description for every action.
--- preprocess:
--- (anytime the dump format changes this will break. this is odd.)
--- #cut away junk before partial HTML, make well-formed, enclose in root tag, escape ampersand, escape apos:
--- (echo "<actions>"; cat ardour_actions.txt | grep -A 100000 '^<h2>' | sed 's/ class="dl"//g' | sed 's/&/&amp;/g' | sed "s/'/\&apos;/g"; echo "</actions>") | xmlstarlet fo > ardour_actions.xml
--- #create lua array:
--- cat ardour_actions.xml | xmlstarlet sel -t -o 'local ardour_action_tokens={' -n -m "//tbody/tr" -o "'" -v th/kbd -o "'," -n -b -o '}' -n -n > ardour_actions.part
--- #cat ardour_actions.xml | xmlstarlet sel -t -o 'local ardour_action_tokens_description={' -n -m "//tbody/tr" -o "'" -v td -o "'," -n -b -o '}' -n -n >> ardour_actions.part
--- #replace ardour_action_tokens in this file
--- #handle with care
--- #cat ardour_actions.part >> ardour_actions.lua
--- #then move the appended array BEFORE functions, right here
+-- load any or create a new session
+-- wait until Ardour closed and a browser coming up showing a table with actions, yay!
+-- save this page to /tmp/actions.html
+-- now create the ardour_action_tokens declaration:
+
+-- $ (echo "<root>"; cat /tmp/actions.html | sed 's/&/&amp;/g'; echo "</root>") | xmlstarlet fo | xmlstarlet sel -t -o 'local ardour_action_tokens={' -n -m "//tbody/tr" -o "'" -v th/kbd -o "'," -n -b -o '}' -n -n
+
+-- replace ardour_action_tokens variable below with the output from the above command (if it looks similar)
+-- this was tested with Ardour git 46a2bfa0e61dd16a0514d81087c08ec965c3e595
 
 -- ============================================================================
 local ardour_action_tokens={
@@ -472,6 +462,7 @@ local ardour_action_tokens={
 '/Editor/select-prev-route',
 '/Editor/select-punch-range',
 '/Editor/select-range-between-cursors',
+'/Editor/select-topmost',
 '/Editor/selected-marker-to-next-region-boundary',
 '/Editor/selected-marker-to-next-region-boundary-noselection',
 '/Editor/selected-marker-to-previous-region-boundary',
