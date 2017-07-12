@@ -1,0 +1,12 @@
+diff --git a/libs/surfaces/wscript b/libs/surfaces/wscript
+index 0e34356..6902501 100644
+--- a/libs/surfaces/wscript
++++ b/libs/surfaces/wscript
+@@ -82,6 +82,7 @@ def build(bld):
+ 
+     if bld.is_defined ('HAVE_LO'):
+         bld.recurse('osc')
++        bld.recurse('cso')
+     if bld.is_defined('BUILD_WIIMOTE'):
+         bld.recurse('wiimote')
+     if bld.is_defined('BUILD_TRANZPORT'):
