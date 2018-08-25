@@ -40,6 +40,8 @@
 //cso.lua script encoded as base64
 #include "cso_script.h"
 
+#define CSO_API_VERSION 0.2f
+
 namespace ARDOUR {
 	class Session;
 	class Route;
@@ -76,7 +78,7 @@ class CSO : public ARDOUR::ControlProtocol, public AbstractUI<CSORequest>
 	static void* request_factory (uint32_t);
 	//end of minimal set
 
-	static float get_cso_api_version() { return cso_api_version; };
+	static float get_cso_api_version() { return CSO_API_VERSION; };
 
 	//see tail of cso.h for more public methods
   protected:
@@ -91,8 +93,6 @@ class CSO : public ARDOUR::ControlProtocol, public AbstractUI<CSORequest>
 	lo_server osc_server;
 	//end of minimal set
 
-//	static constexpr float cso_api_version=0.2f;
-	static float cso_api_version=0.2f;
 	std::string cso_home_path;
 	std::string cso_start_script_uri;
 	std::string cso_custom_script_uri;

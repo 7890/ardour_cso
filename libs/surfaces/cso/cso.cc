@@ -923,7 +923,7 @@ CSO::lua_init ()
 	luabridge::LuaRef lua_ref = luabridge::getGlobal (L, fname.c_str());
 	if(lua_ref.isFunction())
 	{
-		lua_ref(cso_api_version, osc_server_port);
+		lua_ref(CSO_API_VERSION, osc_server_port);
 	}else{warn_lua_function_not_found(fname);}
 } //lua_init()
 
