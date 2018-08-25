@@ -91,7 +91,8 @@ class CSO : public ARDOUR::ControlProtocol, public AbstractUI<CSORequest>
 	lo_server osc_server;
 	//end of minimal set
 
-	static constexpr float cso_api_version=0.2f; //~
+//	static constexpr float cso_api_version=0.2f;
+	static float cso_api_version=0.2f;
 	std::string cso_home_path;
 	std::string cso_start_script_uri;
 	std::string cso_custom_script_uri;
